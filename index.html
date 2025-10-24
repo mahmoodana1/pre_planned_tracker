@@ -2,163 +2,560 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Minimalist Calisthenics Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#ffffff;
-    --card:#f8f8f9;
+    --card:#f7f7f9;
     --ink:#0a0a0a;
     --sub:#6b6b6b;
     --accent:#111111;
-    --shadow:0 6px 20px rgba(0,0,0,.08);
+    --muted:#b9b9b9;
+    --ring:#e6e6ea;
+    --shadow:0 10px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.05);
     --radius:18px;
-    --font:'Poppins',sans-serif;
+    --radius-sm:14px;
+    --font:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   }
   [data-theme="dark"]{
-    --bg:#0d0d0d;
-    --card:#1a1a1a;
-    --ink:#fafafa;
-    --sub:#a1a1a1;
+    --bg:#0e0e10;
+    --card:#141416;
+    --ink:#f6f6f7;
+    --sub:#a1a1a8;
     --accent:#ffffff;
-    --shadow:0 6px 20px rgba(255,255,255,.05);
+    --muted:#4d4d53;
+    --ring:#29292e;
+    --shadow:0 10px 30px rgba(255,255,255,.06), 0 2px 8px rgba(255,255,255,.03);
   }
-  *{box-sizing:border-box; transition:all .25s ease;}
-  body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);overflow-x:hidden;}
-  header{position:sticky;top:0;background:var(--bg);z-index:10;padding:18px 22px;border-bottom:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:space-between;}
-  .title h1{font-size:20px;margin:0;font-weight:600;}
-  .subtitle{color:var(--sub);font-size:13px;}
-  .theme-toggle{background:var(--card);border:none;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow);color:var(--ink);}
-  .wrap{max-width:900px;margin:auto;padding:20px;display:flex;flex-direction:column;gap:20px;}
-  .card{background:var(--card);padding:18px;border-radius:var(--radius);box-shadow:var(--shadow);}
-  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .tab{padding:14px;border-radius:var(--radius);background:var(--bg);box-shadow:var(--shadow);cursor:pointer;text-align:center;font-weight:500;border:1px solid transparent;}
-  .tab.active{border-color:var(--accent);transform:translateY(-2px);}
-  .exercise{background:var(--bg);border-radius:var(--radius);padding:14px;margin-top:10px;box-shadow:var(--shadow);}
-  .exercise .top{display:flex;justify-content:space-between;align-items:center;}
-  .name{font-weight:600;}
-  .muted{color:var(--sub);font-size:13px;}
-  .progress{height:8px;background:#e0e0e0;border-radius:999px;overflow:hidden;margin-top:8px;}
-  .progress>div{height:100%;background:var(--accent);width:0%;transition:width .3s;}
-  button{font-family:var(--font);cursor:pointer;border:none;border-radius:var(--radius);padding:12px 16px;font-weight:500;box-shadow:var(--shadow);}
-  button.primary{background:var(--accent);color:#fff;}
-  button.secondary{background:var(--bg);color:var(--ink);border:1px solid rgba(0,0,0,.1);}
-  nav.bottom{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid rgba(0,0,0,.05);display:flex;justify-content:space-around;padding:12px 0;gap:10px;backdrop-filter:blur(6px);}
-  nav.bottom button{flex:1;max-width:100px;font-size:13px;padding:10px;border-radius:12px;background:var(--bg);color:var(--ink);border:1px solid rgba(0,0,0,.1);}
-  nav.bottom button.active{background:var(--accent);color:#fff;transform:translateY(-2px);}
-  @keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-  .card, .tab, .exercise{animation:fadeInUp .4s ease;}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Header */
+  header{
+    position:sticky;top:0;z-index:11;background:var(--bg);
+    backdrop-filter:saturate(140%) blur(6px);
+    border-bottom:1px solid var(--ring);
+    padding:16px env(safe-area-inset-right) 12px env(safe-area-inset-left);
+  }
+  .h-row{max-width:980px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px}
+  .brand{display:flex;align-items:center;gap:12px}
+  .logo{width:40px;height:40px;border-radius:14px;background:linear-gradient(145deg,#1b1b1b,#3c3c3c);box-shadow:var(--shadow);display:grid;place-items:center}
+  .logo span{color:#fff;font-weight:700}
+  .title{display:flex;flex-direction:column}
+  h1{font-size:18px;line-height:1.1;margin:0}
+  .subtitle{color:var(--sub);font-size:12px}
+
+  .controls{display:flex;gap:10px;align-items:center}
+  .btn{border:none;cursor:pointer;padding:12px 16px;border-radius:14px;box-shadow:var(--shadow);font-weight:600}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.secondary{background:var(--bg);color:var(--ink);border:1px solid var(--ring)}
+  .btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--ring)}
+  #timer{font-variant-numeric:tabular-nums;padding:8px 10px;border-radius:10px;border:1px solid var(--ring);background:var(--bg)}
+  #themeBtn{width:44px;height:44px;border-radius:14px}
+
+  /* Layout */
+  .wrap{max-width:980px;margin:auto;padding:16px 16px 120px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:920px){ .grid{grid-template-columns:1.15fr .85fr} }
+
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+
+  /* Tabs (Days) */
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  @media(min-width:560px){ .tabs{grid-template-columns:repeat(4,1fr)} }
+  .tab{
+    padding:14px;background:var(--bg);border:1px solid var(--ring);border-radius:16px;
+    text-align:center;cursor:pointer;user-select:none;transition:.25s transform,.25s box-shadow;
+  }
+  .tab small{display:block;color:var(--sub);font-size:11px}
+  .tab.active{outline:2px solid var(--accent);transform:translateY(-2px)}
+
+  /* Exercise accordion */
+  .exercise{background:var(--bg);border-radius:16px;border:1px solid var(--ring);box-shadow:var(--shadow);overflow:hidden}
+  .ex-head{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:14px;cursor:pointer;
+  }
+  .ex-name{font-weight:700}
+  .ex-note{color:var(--sub);font-size:12px}
+  .chev{width:26px;height:26px;border-radius:10px;border:1px solid var(--ring);display:grid;place-items:center}
+  .ex-body{padding:12px 14px 16px;border-top:1px dashed var(--ring);display:none}
+  .exercise.open .ex-body{display:block}
+  .sets{display:grid;gap:10px}
+  .set-row{display:grid;grid-template-columns:42px 1fr 1fr 1fr;gap:8px;align-items:center}
+  @media(max-width:420px){ .set-row{grid-template-columns:42px 1fr 1fr} .wcol{display:none} }
+  .chk{
+    appearance:none;width:34px;height:34px;border-radius:10px;border:2px solid var(--accent);display:grid;place-items:center;cursor:pointer;background:transparent;
+  }
+  .chk:checked{background:var(--accent);color:#fff}
+  .chk:checked::after{content:"✓";font-weight:900}
+  .inp{
+    width:100%;padding:12px 12px;border-radius:12px;border:1px solid var(--ring);background:var(--card);
+    font-size:15px;outline:none;
+  }
+  .inp:focus{outline:2px solid var(--accent)}
+  .save{padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--ring)}
+  .unit{font-size:11px;color:var(--sub);margin-left:6px}
+
+  /* Progress bars */
+  .progress{height:10px;background:var(--ring);border-radius:999px;overflow:hidden}
+  .progress>div{height:100%;background:var(--accent);width:0%;transition:width .25s ease}
+
+  /* Week tracker + history */
+  .week-dots{display:flex;gap:8px;flex-wrap:wrap}
+  .dot{width:36px;height:36px;border-radius:12px;background:var(--bg);border:1px solid var(--ring);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--sub);font-weight:700}
+  .dot.done{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .dot.today{outline:2px solid var(--accent)}
+  .log{background:var(--bg);border:1px solid var(--ring);border-radius:16px;padding:12px;box-shadow:var(--shadow)}
+  .muted{color:var(--sub)}
+
+  /* Bottom nav */
+  nav.bottom{
+    position:fixed;left:0;right:0;bottom:0;background:var(--bg);border-top:1px solid var(--ring);
+    padding:10px calc(18px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+    z-index:12;
+  }
+  .tabs-bottom{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:980px;margin:auto;
+  }
+  .tabs-bottom .navbtn{
+    padding:12px;border-radius:14px;border:1px solid var(--ring);background:var(--card);box-shadow:var(--shadow);
+    text-align:center;font-size:13px;font-weight:600
+  }
+  .tabs-bottom .navbtn.active{background:var(--accent);color:#fff;transform:translateY(-2px)}
+
+  /* Animations */
+  @keyframes fadeUp{from{opacity:.0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .card,.tab,.exercise{animation:fadeUp .35s ease}
 </style>
 </head>
 <body>
-<header>
-  <div class="title">
-    <div>
-      <h1>Minimalist Calisthenics Tracker</h1>
-      <div class="subtitle">Upper Body · 4 Days · High Intensity</div>
+  <header>
+    <div class="h-row">
+      <div class="brand">
+        <div class="logo"><span>MX</span></div>
+        <div class="title">
+          <h1>Minimalist Calisthenics – Upper Body (4-Day)</h1>
+          <div class="subtitle">High-Intensity · Low-Volume · Vest 10–20 kg · Calisthenics Park</div>
+        </div>
+      </div>
+      <div class="controls">
+        <span id="timer">00:00</span>
+        <button class="btn ghost" id="themeBtn" aria-label="Toggle theme">🌞</button>
+      </div>
     </div>
-  </div>
-  <button class="theme-toggle" id="themeBtn">☀️</button>
-</header>
+  </header>
 
-<div class="wrap">
-  <div class="card" id="planCard">
-    <div class="tabs" id="dayTabs"></div>
-    <div id="exerciseList"></div>
-    <div class="progress"><div id="sessionProgress"></div></div>
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <button class="primary" id="startBtn">Start Workout</button>
-      <button class="secondary" id="finishBtn" disabled>Finish</button>
+  <main class="wrap">
+    <div class="grid">
+      <!-- Left column: workout -->
+      <section class="card" id="workoutCard">
+        <div class="tabs" id="dayTabs"></div>
+
+        <div id="exerciseList" class="grid"></div>
+
+        <div style="display:flex;gap:10px;align-items:center;margin-top:12px">
+          <div class="progress" style="flex:1"><div id="sessionProgress" style="width:0%"></div></div>
+          <button class="btn secondary" id="resetSession">Reset</button>
+          <button class="btn primary" id="startBtn">Start</button>
+          <button class="btn secondary" id="finishBtn" disabled>Finish</button>
+        </div>
+      </section>
+
+      <!-- Right column: week + history -->
+      <aside class="card">
+        <h3 style="margin:4px 0 8px">This Week</h3>
+        <div class="week-dots" id="weekDots" style="margin-bottom:8px"></div>
+        <div class="progress" style="margin-bottom:8px"><div id="weekBar" style="width:0%"></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+          <span class="btn ghost" id="resetWeekBtn">Reset Week</span>
+          <span class="btn ghost" id="exportBtn">Export CSV</span>
+        </div>
+        <h3 style="margin:12px 0 8px">Recent Sessions</h3>
+        <div id="historyList" class="grid"></div>
+      </aside>
     </div>
-  </div>
+  </main>
 
-  <div class="card" id="historyCard">
-    <h3>Recent Sessions</h3>
-    <div id="historyList"></div>
-  </div>
-</div>
-
-<nav class="bottom">
-  <button class="active">Workout</button>
-  <button>Week</button>
-  <button>History</button>
-  <button>Settings</button>
-</nav>
+  <nav class="bottom" aria-label="Bottom navigation">
+    <div class="tabs-bottom">
+      <button class="navbtn active" data-view="workout">Workout</button>
+      <button class="navbtn" data-view="week">Week</button>
+      <button class="navbtn" data-view="history">History</button>
+      <button class="navbtn" data-view="settings">Settings</button>
+    </div>
+  </nav>
 
 <script>
-const PLAN=[
- {name:'Day 1 – Horizontal Strength',ex:['Weighted Dips','Weighted Inverted Rows','Feet-Elevated Push-ups','Australian Rows']},
- {name:'Day 2 – Vertical Strength',ex:['Weighted Pull-ups','Weighted Pike Push-ups','Chin-ups','Scapular Pulls']},
- {name:'Day 3 – Power / Explosive',ex:['Muscle-up Progression','Plyometric Push-ups','Archer Pull-ups']},
- {name:'Day 4 – Hypertrophy & Arms',ex:['Wide-Grip Pull-ups','Close-Grip Dips','Bodyweight Curls','Push-up Burnout']}
-];
-let state={day:0,progress:0,theme:'light',history:[]};
-const dayTabs=document.getElementById('dayTabs');
-const exList=document.getElementById('exerciseList');
-const prog=document.getElementById('sessionProgress');
-const hist=document.getElementById('historyList');
-const startBtn=document.getElementById('startBtn');
-const finishBtn=document.getElementById('finishBtn');
-const themeBtn=document.getElementById('themeBtn');
-
-function renderTabs(){
-  dayTabs.innerHTML='';
-  PLAN.forEach((d,i)=>{
-    const t=document.createElement('div');
-    t.className='tab'+(i===state.day?' active':'');
-    t.textContent=d.name;
-    t.onclick=()=>{state.day=i;renderTabs();renderExercises();};
-    dayTabs.appendChild(t);
-  });
-}
-function renderExercises(){
-  exList.innerHTML='';
-  PLAN[state.day].ex.forEach(e=>{
-    const c=document.createElement('div');
-    c.className='exercise';
-    c.innerHTML=`<div class='top'><div><div class='name'>${e}</div></div></div>`;
-    exList.appendChild(c);
-  });
-  updateProgress();
-}
-function updateProgress(){prog.style.width=state.progress+'%';}
-startBtn.onclick=()=>{
-  state.progress=50;
-  updateProgress();
-  startBtn.disabled=true;
-  finishBtn.disabled=false;
-};
-finishBtn.onclick=()=>{
-  state.progress=100;
-  updateProgress();
-  finishBtn.disabled=true;
-  state.history.unshift({day:PLAN[state.day].name,date:new Date().toLocaleDateString()});
-  renderHistory();
-};
-function renderHistory(){
-  hist.innerHTML='';
-  state.history.forEach(h=>{
-    const c=document.createElement('div');
-    c.className='exercise';
-    c.innerHTML=`<div class='name'>${h.day}</div><div class='muted'>${h.date}</div>`;
-    hist.appendChild(c);
-  });
-}
-function toggleTheme(){
-  if(state.theme==='light'){
-    document.body.dataset.theme='dark';
-    state.theme='dark';
-    themeBtn.textContent='🌙';
-  }else{
-    document.body.dataset.theme='light';
-    state.theme='light';
-    themeBtn.textContent='☀️';
+/* ---------- PLAN (exact, no rings/core) ---------- */
+const PLAN = [
+  {
+    id:"D1", name:"Day 1 – Horizontal Strength", note:"Dips / Rows",
+    exercises:[
+      { name:"Weighted Dips", target:"2×6–8", sets:2 },
+      { name:"Weighted Inverted Rows", target:"2×6–8", sets:2 },
+      { name:"Feet-Elevated Push-ups (vest)", target:"1×10–12", sets:1 },
+      { name:"Australian Rows", target:"1×10–12", sets:1 },
+    ]
+  },
+  {
+    id:"D2", name:"Day 2 – Vertical Strength", note:"Pull-ups / Pike Push-ups",
+    exercises:[
+      { name:"Weighted Pull-ups", target:"2×6–8", sets:2 },
+      { name:"Weighted Pike Push-ups / HSPU prog.", target:"2×6–8", sets:2 },
+      { name:"Chin-ups (underhand)", target:"1×8–10", sets:1 },
+      { name:"Scapular Pulls", target:"1×12–15", sets:1 },
+    ]
+  },
+  {
+    id:"D3", name:"Day 3 – Power / Explosive", note:"Muscle-up or Explosive",
+    exercises:[
+      { name:"Muscle-up progression OR Explosive Pull-up", target:"3×3–5", sets:3 },
+      { name:"Plyometric Push-ups (vest optional)", target:"2×5–8", sets:2 },
+      { name:"Archer / Typewriter Pull-ups", target:"2×4–6/side", sets:2 },
+    ]
+  },
+  {
+    id:"D4", name:"Day 4 – Hypertrophy & Arms", note:"Pull-ups / Dips / Curls",
+    exercises:[
+      { name:"Wide-Grip Pull-ups", target:"1–2×8–12", sets:2 },
+      { name:"Close-Grip Dips", target:"1–2×8–12", sets:2 },
+      { name:"Bodyweight Curls (bar)", target:"1×10–15", sets:1 },
+      { name:"Push-up Burnout", target:"1×max", sets:1 },
+    ]
   }
+];
+
+/* ---------- State & Storage ---------- */
+const SKEY = "mx_cali_tracker_v2";
+const state = load() || initialState();
+function initialState(){
+  return {
+    dayIndex:0,
+    running:false,
+    startTime:null,
+    session:{},        // per dayIndex: { [exerciseIndex]: [{reps, kg, done}] }
+    history:[],        // saved sessions
+    theme:"light",
+    weekKey: weekKey(),
+    weekDays:{}        // 'YYYY-WW-d': true/false
+  };
 }
-themeBtn.onclick=toggleTheme;
+function load(){ try { return JSON.parse(localStorage.getItem(SKEY)); } catch(e){ return null } }
+function save(){ localStorage.setItem(SKEY, JSON.stringify(state)); }
+
+/* ---------- Helpers ---------- */
+function weekKey(d=new Date()){
+  const dt = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = (dt.getUTCDay()+6)%7;
+  dt.setUTCDate(dt.getUTCDate()-dayNum+3);
+  const firstThursday = new Date(Date.UTC(dt.getUTCFullYear(),0,4));
+  const week = 1 + Math.round(((dt - firstThursday)/86400000 - 3 + ((firstThursday.getUTCDay()+6)%7))/7);
+  return `${dt.getUTCFullYear()}-W${String(week).padStart(2,"0")}`;
+}
+function dayKey(d=new Date()){ return `${weekKey(d)}-${d.getDay()}` } // 0..6 Sun..Sat
+
+/* ---------- Elements ---------- */
+const dayTabsEl = document.getElementById("dayTabs");
+const exerciseListEl = document.getElementById("exerciseList");
+const sessionProgressEl = document.getElementById("sessionProgress");
+const historyListEl = document.getElementById("historyList");
+const weekDotsEl = document.getElementById("weekDots");
+const weekBarEl = document.getElementById("weekBar");
+
+const startBtn = document.getElementById("startBtn");
+const finishBtn = document.getElementById("finishBtn");
+const resetSessionBtn = document.getElementById("resetSession");
+const resetWeekBtn = document.getElementById("resetWeekBtn");
+const exportBtn = document.getElementById("exportBtn");
+const timerEl = document.getElementById("timer");
+const themeBtn = document.getElementById("themeBtn");
+
+/* ---------- Theme ---------- */
+function applyTheme(){
+  document.body.dataset.theme = state.theme === "dark" ? "dark" : "light";
+  themeBtn.textContent = state.theme === "dark" ? "🌜" : "🌞";
+}
+themeBtn.addEventListener("click", ()=>{
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  save(); applyTheme();
+});
+
+/* ---------- Tabs (Days) ---------- */
+function renderTabs(){
+  dayTabsEl.innerHTML = "";
+  PLAN.forEach((d,i)=>{
+    const tab = document.createElement("div");
+    tab.className = "tab"+(i===state.dayIndex?" active":"");
+    tab.innerHTML = `<b>${d.id}</b><small>${d.note}</small><div>${d.name}</div>`;
+    tab.addEventListener("click", ()=>{
+      state.dayIndex = i;
+      save();
+      renderTabs();
+      renderExercises();
+      updateSessionProgress();
+    });
+    dayTabsEl.appendChild(tab);
+  });
+}
+
+/* ---------- Exercises UI ---------- */
+function ensureSessDay(){
+  if(!state.session[state.dayIndex]) state.session[state.dayIndex] = {};
+}
+
+function renderExercises(){
+  const day = PLAN[state.dayIndex];
+  const sess = state.session[state.dayIndex] || {};
+  exerciseListEl.innerHTML = "";
+
+  day.exercises.forEach((ex, ei)=>{
+    const existing = sess[ei] || Array.from({length: ex.sets}, ()=>({reps:"", kg:"", done:false}));
+
+    const box = document.createElement("div");
+    box.className = "exercise";
+    box.innerHTML = `
+      <div class="ex-head" role="button" aria-expanded="false">
+        <div>
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-note">Target: ${ex.target}</div>
+        </div>
+        <div class="chev" aria-hidden="true">▾</div>
+      </div>
+      <div class="ex-body">
+        <div class="sets" id="sets-${ei}"></div>
+      </div>
+    `;
+    exerciseListEl.appendChild(box);
+
+    // Expand/collapse (bigger tap)
+    const head = box.querySelector(".ex-head");
+    head.addEventListener("click", ()=>{
+      const open = box.classList.toggle("open");
+      head.setAttribute("aria-expanded", open?"true":"false");
+    });
+
+    // Render sets
+    const setsEl = box.querySelector(`#sets-${ei}`);
+    existing.forEach((row, si)=>{
+      const rowEl = document.createElement("div");
+      rowEl.className = "set-row";
+      rowEl.innerHTML = `
+        <input type="checkbox" class="chk" ${row.done?"checked":""} aria-label="Set ${si+1} done">
+        <div>
+          <input class="inp" inputmode="numeric" pattern="[0-9]*" placeholder="Reps" value="${row.reps}">
+          <span class="unit">reps</span>
+        </div>
+        <div>
+          <input class="inp" inputmode="decimal" placeholder="Vest kg" value="${row.kg}">
+          <span class="unit">kg</span>
+        </div>
+        <button class="save wcol">Save</button>
+      `;
+      const chk = rowEl.querySelector(".chk");
+      const repsEl = rowEl.querySelectorAll(".inp")[0];
+      const kgEl = rowEl.querySelectorAll(".inp")[1];
+      const saveBtn = rowEl.querySelector(".save");
+
+      // Mobile-friendly: any change auto-saves
+      const saveSet = ()=>{
+        ensureSessDay();
+        const arr = state.session[state.dayIndex][ei] || Array.from({length: ex.sets}, ()=>({reps:"", kg:"", done:false}));
+        arr[si] = { reps: repsEl.value.trim(), kg: kgEl.value.trim(), done: chk.checked };
+        state.session[state.dayIndex][ei] = arr;
+        save();
+        updateSessionProgress();
+      };
+      chk.addEventListener("change", saveSet);
+      repsEl.addEventListener("change", saveSet);
+      kgEl.addEventListener("change", saveSet);
+      saveBtn.addEventListener("click", saveSet);
+
+      setsEl.appendChild(rowEl);
+    });
+  });
+}
+
+/* ---------- Session progress ---------- */
+function sessionTotals(){
+  const day = PLAN[state.dayIndex];
+  const sess = state.session[state.dayIndex] || {};
+  const total = day.exercises.reduce((a,b)=>a+b.sets,0);
+  let done = 0;
+  day.exercises.forEach((ex, ei)=>{
+    (sess[ei] || []).forEach(s=>{ if(s.done) done++; });
+  });
+  return {done,total};
+}
+function updateSessionProgress(){
+  const {done,total} = sessionTotals();
+  sessionProgressEl.style.width = (total? Math.round(done/total*100) : 0) + "%";
+}
+
+/* ---------- Timer ---------- */
+let timerInt = null;
+function startTimer(){
+  if(state.running) return;
+  state.running = true;
+  state.startTime = Date.now();
+  save();
+  startBtn.disabled = true;
+  finishBtn.disabled = false;
+  timerInt = setInterval(()=>{
+    const s = Math.floor((Date.now()-state.startTime)/1000);
+    const mm = String(Math.floor(s/60)).padStart(2,"0");
+    const ss = String(s%60).padStart(2,"0");
+    timerEl.textContent = `${mm}:${ss}`;
+  }, 500);
+}
+function stopTimer(){
+  if(!state.running) return 0;
+  const secs = Math.floor((Date.now()-state.startTime)/1000);
+  state.running = false;
+  state.startTime = null;
+  clearInterval(timerInt); timerInt=null;
+  startBtn.disabled = false;
+  finishBtn.disabled = true;
+  save();
+  return secs;
+}
+
+/* ---------- Save session ---------- */
+function finishAndSave(){
+  const duration = stopTimer();
+  const {done,total} = sessionTotals();
+  const entry = {
+    ts: new Date().toISOString(),
+    title: PLAN[state.dayIndex].name,
+    dayIndex: state.dayIndex,
+    data: state.session[state.dayIndex] || {},
+    week: weekKey(),
+    duration,
+    progress: {done,total}
+  };
+  state.history.unshift(entry);
+  state.session[state.dayIndex] = {}; // clear current day
+  // mark calendar day
+  state.weekKey = weekKey();
+  state.weekDays[dayKey(new Date())] = true;
+
+  save();
+  renderExercises();
+  updateSessionProgress();
+  renderWeek();
+  renderHistory();
+}
+
+/* ---------- Week UI ---------- */
+function renderWeek(){
+  // reset if new week
+  const wk = weekKey();
+  if(state.weekKey !== wk){ state.weekKey = wk; state.weekDays = {}; save(); }
+
+  weekDotsEl.innerHTML = "";
+  let active = 0;
+  for(let i=0;i<7;i++){
+    const k = `${wk}-${i}`;
+    const dot = document.createElement("div");
+    dot.className = "dot"+(state.weekDays[k]?" done":"");
+    if(i === new Date().getDay()) dot.classList.add("today");
+    dot.textContent = "SMTWTFS"[i];
+    weekDotsEl.appendChild(dot);
+    if(state.weekDays[k]) active++;
+  }
+  weekBarEl.style.width = Math.round(active/7*100) + "%";
+}
+
+/* ---------- History ---------- */
+function renderHistory(){
+  historyListEl.innerHTML = "";
+  state.history.slice(0,8).forEach(h=>{
+    const d = new Date(h.ts);
+    const when = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const pct = h.progress.total ? Math.round(h.progress.done/h.progress.total*100) : 0;
+    const log = document.createElement("div");
+    log.className = "log";
+    log.innerHTML = `
+      <div style="font-weight:700">${h.title}</div>
+      <div class="muted">${when} · ${h.duration? Math.floor(h.duration/60)+"m "+(h.duration%60)+"s":"—"}</div>
+      <div class="progress" style="margin-top:8px"><div style="width:${pct}%"></div></div>
+    `;
+    historyListEl.appendChild(log);
+  });
+}
+
+/* ---------- Export CSV ---------- */
+function exportCSV(){
+  const rows = [["timestamp","week","program_day","exercise_index","set_index","reps","vest_kg","done","duration_sec"]];
+  state.history.forEach(h=>{
+    const data = h.data || {};
+    const dur = h.duration || 0;
+    Object.keys(data).forEach(ei=>{
+      (data[ei]||[]).forEach((s,si)=>{
+        rows.push([h.ts,h.week,h.dayIndex,ei,si,s.reps,s.kg,s.done?1:0,dur]);
+      });
+    });
+  });
+  const blob = new Blob([rows.map(r=>r.join(",")).join("\n")], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "minimalist_calisthenics_history.csv"; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ---------- Resets ---------- */
+function resetSession(){ state.session[state.dayIndex] = {}; save(); renderExercises(); updateSessionProgress(); }
+function resetWeek(){ state.weekDays = {}; save(); renderWeek(); }
+
+/* ---------- Bottom nav (scroll to sections for now) ---------- */
+document.querySelector(".bottom").addEventListener("click", (e)=>{
+  const btn = e.target.closest(".navbtn"); if(!btn) return;
+  document.querySelectorAll(".navbtn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  const view = btn.dataset.view;
+  if(view==="workout"){ document.getElementById("workoutCard").scrollIntoView({behavior:"smooth", block:"start"}); }
+  if(view==="week"){ window.scrollTo({top: document.getElementById("workoutCard").offsetTop - 8, behavior:"smooth"}); }
+  if(view==="history"){ document.getElementById("historyList").scrollIntoView({behavior:"smooth", block:"start"}); }
+  if(view==="settings"){ window.scrollTo({top:0, behavior:"smooth"}); }
+});
+
+/* ---------- Wire up buttons ---------- */
+startBtn.addEventListener("click", startTimer);
+finishBtn.addEventListener("click", finishAndSave);
+resetSessionBtn.addEventListener("click", resetSession);
+resetWeekBtn.addEventListener("click", resetWeek);
+exportBtn.addEventListener("click", exportCSV);
+
+/* ---------- Init ---------- */
+applyTheme();
 renderTabs();
 renderExercises();
+renderWeek();
+renderHistory();
+updateSessionProgress();
+
+// Restore running timer if page reloaded mid-session
+if(state.running && state.startTime){
+  startBtn.disabled = true; finishBtn.disabled = false;
+  const offset = Math.max(0, Math.floor((Date.now()-state.startTime)/1000));
+  const mm = String(Math.floor(offset/60)).padStart(2,"0");
+  const ss = String(offset%60).padStart(2,"0");
+  timerEl.textContent = `${mm}:${ss}`;
+  // resume ticking
+  let startedAt = state.startTime;
+  timerInt = setInterval(()=>{
+    const s = Math.floor((Date.now()-startedAt)/1000);
+    const mm = String(Math.floor(s/60)).padStart(2,"0");
+    const ss = String(s%60).padStart(2,"0");
+    timerEl.textContent = `${mm}:${ss}`;
+  }, 500);
+}
 </script>
 </body>
 </html>
