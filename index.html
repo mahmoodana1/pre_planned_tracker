@@ -4,517 +4,161 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Minimalist Calisthenics Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#ffffff;
-    --card:#f5f5f7;
+    --card:#f8f8f9;
     --ink:#0a0a0a;
-    --sub:#5a5a5a;
-    --muted:#8c8c8c;
+    --sub:#6b6b6b;
     --accent:#111111;
-    --ok:#16a34a;
-    --warn:#ef4444;
-    --shadow:0 8px 24px rgba(0,0,0,.10), 0 2px 8px rgba(0,0,0,.06);
-    --radius:16px;
+    --shadow:0 6px 20px rgba(0,0,0,.08);
+    --radius:18px;
+    --font:'Poppins',sans-serif;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-    background:var(--bg); color:var(--ink);
+  [data-theme="dark"]{
+    --bg:#0d0d0d;
+    --card:#1a1a1a;
+    --ink:#fafafa;
+    --sub:#a1a1a1;
+    --accent:#ffffff;
+    --shadow:0 6px 20px rgba(255,255,255,.05);
   }
-  .wrap{max-width:980px; margin-inline:auto; padding:20px; padding-bottom:120px}
-  header{
-    position:sticky; top:0; z-index:5; background:linear-gradient(180deg,var(--bg) 80%,rgba(255,255,255,0));
-    padding:16px 20px 6px; border-bottom:1px solid #eee;
-    backdrop-filter:saturate(160%) blur(4px);
-  }
-  .title{display:flex; align-items:center; gap:12px}
-  .logo{width:42px; height:42px; border-radius:12px; background:linear-gradient(145deg,#1f1f1f,#3a3a3a); box-shadow:var(--shadow); display:grid; place-items:center}
-  .logo span{color:#fff; font-weight:700}
-  h1{font-size:20px; margin:0}
-  .subtitle{color:var(--sub); font-size:12px}
-
-  .grid{display:grid; gap:16px}
-  @media(min-width:880px){ .grid{grid-template-columns: 1.1fr .9fr} }
-
-  .card{background:var(--card); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow)}
-  .card h3{margin:0 0 6px 0}
-  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-  .pill{padding:8px 12px; border-radius:999px; background:#fff; box-shadow:var(--shadow); font-size:12px; color:var(--sub)}
-
-  /* Week tracker */
-  .week{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
-  .dot{width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:#fff; box-shadow:var(--shadow); color:var(--muted); font-weight:700}
-  .dot.done{background:#111; color:#fff}
-  .dot.today{outline:2px solid #111}
-  .week-bar{height:10px; background:#e9e9ec; border-radius:999px; overflow:hidden}
-  .week-bar > div{height:100%; background:#111}
-
-  /* Tabs */
-  .tabs{display:flex; gap:8px; flex-wrap:wrap}
-  .tab{flex:1 1 120px; padding:12px; border-radius:12px; background:#fff; box-shadow:var(--shadow); border:1px solid transparent; cursor:pointer; text-align:center}
-  .tab small{display:block; color:var(--muted)}
-  .tab.active{border-color:#111}
-
-  /* Workout list */
-  .exercise{background:#fff; border-radius:14px; padding:12px; box-shadow:var(--shadow); border:1px solid #eaeaea}
-  .exercise .top{display:flex; justify-content:space-between; align-items:center; gap:8px}
-  .exercise .name{font-weight:700}
-  .badge{font-size:12px; padding:4px 8px; background:#111; color:#fff; border-radius:999px}
-  .sets{display:grid; gap:8px; margin-top:10px}
-  .set{display:grid; grid-template-columns: 38px 1fr 1fr 82px; gap:8px; align-items:center}
-  .set input{width:100%; padding:10px 10px; border-radius:12px; border:1px solid #e6e6e9; background:#fafafa}
-  .set .check{appearance:none; width:32px; height:32px; border-radius:10px; border:2px solid #111; display:grid; place-items:center; cursor:pointer}
-  .set .check:checked{background:#111; border-color:#111}
-  .set .check:checked::after{content:"✓"; color:#fff; font-weight:800}
-  .set .unit{font-size:12px; color:var(--muted); margin-left:4px}
-  .progress{height:9px; background:#eee; border-radius:999px; overflow:hidden}
-  .progress > div{height:100%; background:#111}
-
-  /* Actions */
-  .actions{display:flex; gap:10px; flex-wrap:wrap}
-  button{background:#111; color:#fff; border:none; padding:12px 16px; border-radius:12px; box-shadow:var(--shadow); cursor:pointer}
-  button.secondary{background:#fff; color:#111; border:1px solid #111}
-  button.ghost{background:#fff; color:#111; border:1px solid #e5e5e5}
-  .timer{font-variant-numeric:tabular-nums; padding:8px 12px; background:#fff; border-radius:10px; border:1px solid #e5e5e5}
-
-  /* History */
-  .history{display:grid; gap:10px}
-  .log{background:#fff; border-radius:14px; padding:12px; box-shadow:var(--shadow); border:1px solid #eee}
-  .log h4{margin:0 0 4px 0}
-  .muted{color:var(--muted)}
-
-  /* Bottom nav */
-  nav.bottom{
-    position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid #eee; box-shadow:0 -10px 30px rgba(0,0,0,.08);
-    display:grid; grid-template-columns:repeat(4,1fr); padding:10px 8px; z-index:10
-  }
-  nav.bottom button{padding:10px; border-radius:12px; background:#f6f6f6; color:#111; border:1px solid #e6e6e6}
-  nav.bottom button.active{background:#111; color:#fff; border-color:#111}
-
-  /* Toast */
-  .toast{position:fixed; left:50%; transform:translateX(-50%); bottom:80px; background:#111; color:#fff; padding:10px 14px; border-radius:12px; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:.3s}
-  .toast.show{opacity:1}
+  *{box-sizing:border-box; transition:all .25s ease;}
+  body{margin:0;font-family:var(--font);background:var(--bg);color:var(--ink);overflow-x:hidden;}
+  header{position:sticky;top:0;background:var(--bg);z-index:10;padding:18px 22px;border-bottom:1px solid rgba(0,0,0,.05);display:flex;align-items:center;justify-content:space-between;}
+  .title h1{font-size:20px;margin:0;font-weight:600;}
+  .subtitle{color:var(--sub);font-size:13px;}
+  .theme-toggle{background:var(--card);border:none;padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--shadow);color:var(--ink);}
+  .wrap{max-width:900px;margin:auto;padding:20px;display:flex;flex-direction:column;gap:20px;}
+  .card{background:var(--card);padding:18px;border-radius:var(--radius);box-shadow:var(--shadow);}
+  .tabs{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .tab{padding:14px;border-radius:var(--radius);background:var(--bg);box-shadow:var(--shadow);cursor:pointer;text-align:center;font-weight:500;border:1px solid transparent;}
+  .tab.active{border-color:var(--accent);transform:translateY(-2px);}
+  .exercise{background:var(--bg);border-radius:var(--radius);padding:14px;margin-top:10px;box-shadow:var(--shadow);}
+  .exercise .top{display:flex;justify-content:space-between;align-items:center;}
+  .name{font-weight:600;}
+  .muted{color:var(--sub);font-size:13px;}
+  .progress{height:8px;background:#e0e0e0;border-radius:999px;overflow:hidden;margin-top:8px;}
+  .progress>div{height:100%;background:var(--accent);width:0%;transition:width .3s;}
+  button{font-family:var(--font);cursor:pointer;border:none;border-radius:var(--radius);padding:12px 16px;font-weight:500;box-shadow:var(--shadow);}
+  button.primary{background:var(--accent);color:#fff;}
+  button.secondary{background:var(--bg);color:var(--ink);border:1px solid rgba(0,0,0,.1);}
+  nav.bottom{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid rgba(0,0,0,.05);display:flex;justify-content:space-around;padding:12px 0;gap:10px;backdrop-filter:blur(6px);}
+  nav.bottom button{flex:1;max-width:100px;font-size:13px;padding:10px;border-radius:12px;background:var(--bg);color:var(--ink);border:1px solid rgba(0,0,0,.1);}
+  nav.bottom button.active{background:var(--accent);color:#fff;transform:translateY(-2px);}
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  .card, .tab, .exercise{animation:fadeInUp .4s ease;}
 </style>
 </head>
 <body>
-  <header>
-    <div class="title">
-      <div class="logo"><span>MX</span></div>
-      <div>
-        <h1>Minimalist Calisthenics – Upper Body (4‑Day)</h1>
-        <div class="subtitle">High‑intensity · Low‑volume · Vest 10–20 kg · Calisthenics park</div>
-      </div>
+<header>
+  <div class="title">
+    <div>
+      <h1>Minimalist Calisthenics Tracker</h1>
+      <div class="subtitle">Upper Body · 4 Days · High Intensity</div>
     </div>
-  </header>
+  </div>
+  <button class="theme-toggle" id="themeBtn">☀️</button>
+</header>
 
-  <div class="wrap">
-
-    <div class="grid">
-      <!-- Left: Workout / Controls -->
-      <section class="card" id="workoutCard">
-        <h3>Current Plan</h3>
-        <div class="row" style="justify-content:space-between; margin-bottom:10px">
-          <div class="row" id="weekSummary">
-            <span class="pill" id="weekLabel">Week 1</span>
-            <span class="pill">Completed <b id="weekDone">0</b>/4</span>
-            <span class="pill">This week: <b id="weekCount">0</b>/7 days</span>
-          </div>
-          <div class="row" id="timerWrap">
-            <span class="timer" id="timer">00:00</span>
-            <button id="startBtn">Start Workout</button>
-            <button id="finishBtn" class="secondary" disabled>Finish & Save</button>
-          </div>
-        </div>
-
-        <!-- Tabs for the 4 days -->
-        <div class="tabs" id="dayTabs"></div>
-
-        <!-- Exercises render here -->
-        <div id="exerciseList" class="grid" style="margin-top:12px"></div>
-
-        <div class="row" style="margin-top:14px; justify-content:space-between">
-          <div style="flex:1">
-            <div class="progress"><div id="sessionProgress" style="width:0%"></div></div>
-          </div>
-          <div class="row">
-            <button class="ghost" id="resetSession">Reset Session</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Right: Week tracker & History quick view -->
-      <aside class="card">
-        <h3>This Week</h3>
-        <div class="week" id="weekDots" style="margin-bottom:8px"></div>
-        <div class="week-bar"><div id="weekBar" style="width:0%"></div></div>
-        <div class="row" style="justify-content:space-between; margin-top:10px">
-          <button class="ghost" id="resetWeek">Reset Week</button>
-          <button class="ghost" id="exportBtn">Export CSV</button>
-        </div>
-        <div style="height:10px"></div>
-        <h3>Recent Sessions</h3>
-        <div class="history" id="historyList"></div>
-      </aside>
+<div class="wrap">
+  <div class="card" id="planCard">
+    <div class="tabs" id="dayTabs"></div>
+    <div id="exerciseList"></div>
+    <div class="progress"><div id="sessionProgress"></div></div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <button class="primary" id="startBtn">Start Workout</button>
+      <button class="secondary" id="finishBtn" disabled>Finish</button>
     </div>
-
   </div>
 
-  <nav class="bottom">
-    <button class="active" data-view="workout">Workout</button>
-    <button data-view="week">Week</button>
-    <button data-view="history">History</button>
-    <button data-view="settings">Settings</button>
-  </nav>
+  <div class="card" id="historyCard">
+    <h3>Recent Sessions</h3>
+    <div id="historyList"></div>
+  </div>
+</div>
 
-  <div class="toast" id="toast">Saved</div>
+<nav class="bottom">
+  <button class="active">Workout</button>
+  <button>Week</button>
+  <button>History</button>
+  <button>Settings</button>
+</nav>
 
 <script>
-/***************************
- * Minimalist Calisthenics
- * 4‑Day Upper Body Plan
- * (No rings, no core; exact plan)
- ***************************/
-const PLAN = [
-  {
-    id:"D1", name:"Day 1 – Horizontal Strength", note:"Dips / Rows",
-    exercises:[
-      { name:"Weighted Dips", target:"2×6–8", sets:2 },
-      { name:"Weighted Inverted Rows", target:"2×6–8", sets:2 },
-      { name:"Feet‑Elevated Push‑ups (vest)", target:"1×10–12", sets:1 },
-      { name:"Australian Rows", target:"1×10–12", sets:1 },
-    ]
-  },
-  {
-    id:"D2", name:"Day 2 – Vertical Strength", note:"Pull‑ups / Pike Push‑ups",
-    exercises:[
-      { name:"Weighted Pull‑ups", target:"2×6–8", sets:2 },
-      { name:"Weighted Pike Push‑ups / HSPU prog.", target:"2×6–8", sets:2 },
-      { name:"Chin‑ups (underhand)", target:"1×8–10", sets:1 },
-      { name:"Scapular Pulls", target:"1×12–15", sets:1 },
-    ]
-  },
-  {
-    id:"D3", name:"Day 3 – Power / Explosive", note:"Muscle‑up or Explosive",
-    exercises:[
-      { name:"Muscle‑up progression OR Explosive Pull‑up", target:"3×3–5", sets:3 },
-      { name:"Plyometric Push‑ups (vest opt.)", target:"2×5–8", sets:2 },
-      { name:"Archer / Typewriter Pull‑ups", target:"2×4–6/side", sets:2 },
-    ]
-  },
-  {
-    id:"D4", name:"Day 4 – Hypertrophy & Arms", note:"Pull‑ups / Dips / Curls",
-    exercises:[
-      { name:"Wide‑Grip Pull‑ups", target:"1–2×8–12", sets:2 },
-      { name:"Close‑Grip Dips", target:"1–2×8–12", sets:2 },
-      { name:"Bodyweight Curls (bar)", target:"1×10–15", sets:1 },
-      { name:"Push‑up Burnout", target:"1×max", sets:1 },
-    ]
-  }
+const PLAN=[
+ {name:'Day 1 – Horizontal Strength',ex:['Weighted Dips','Weighted Inverted Rows','Feet-Elevated Push-ups','Australian Rows']},
+ {name:'Day 2 – Vertical Strength',ex:['Weighted Pull-ups','Weighted Pike Push-ups','Chin-ups','Scapular Pulls']},
+ {name:'Day 3 – Power / Explosive',ex:['Muscle-up Progression','Plyometric Push-ups','Archer Pull-ups']},
+ {name:'Day 4 – Hypertrophy & Arms',ex:['Wide-Grip Pull-ups','Close-Grip Dips','Bodyweight Curls','Push-up Burnout']}
 ];
+let state={day:0,progress:0,theme:'light',history:[]};
+const dayTabs=document.getElementById('dayTabs');
+const exList=document.getElementById('exerciseList');
+const prog=document.getElementById('sessionProgress');
+const hist=document.getElementById('historyList');
+const startBtn=document.getElementById('startBtn');
+const finishBtn=document.getElementById('finishBtn');
+const themeBtn=document.getElementById('themeBtn');
 
-// --- State & Storage ---
-const SKEY = "mx_cali_tracker_v1";
-let state = load() || initialState();
-
-function initialState(){
-  return {
-    dayIndex:0,
-    running:false,
-    startTime:null,
-    session:{}, // { exerciseIndex: [{reps, weight, done}] }
-    history:[], // array of sessions saved
-    week: currentWeekKey(),
-    weekDays: {}, // key=YYYY-WW-D(0-6) : true if done
-  };
-}
-function save(){ localStorage.setItem(SKEY, JSON.stringify(state)); }
-function load(){ try{ return JSON.parse(localStorage.getItem(SKEY)); }catch(e){ return null; } }
-
-function currentWeekKey(){
-  const d=new Date();
-  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  // ISO week number
-  const dayNum = (t.getUTCDay()+6)%7; // 0=Mon
-  t.setUTCDate(t.getUTCDate()-dayNum+3);
-  const firstThursday = new Date(Date.UTC(t.getUTCFullYear(),0,4));
-  const week = 1 + Math.round(((t - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay()+6)%7)) / 7);
-  return `${t.getUTCFullYear()}-W${String(week).padStart(2,'0')}`;
-}
-
-function dayKeyForDate(date=new Date()){
-  const week=currentWeekKey();
-  return `${week}-${date.getDay()}`; // 0..6 (Sun..Sat)
-}
-
-// --- UI Elements ---
-const dayTabsEl = document.getElementById('dayTabs');
-const exerciseListEl = document.getElementById('exerciseList');
-const sessionProgressEl = document.getElementById('sessionProgress');
-const weekDotsEl = document.getElementById('weekDots');
-const weekBarEl = document.getElementById('weekBar');
-const weekLabelEl = document.getElementById('weekLabel');
-const weekDoneEl = document.getElementById('weekDone');
-const weekCountEl = document.getElementById('weekCount');
-const historyListEl = document.getElementById('historyList');
-const startBtn = document.getElementById('startBtn');
-const finishBtn = document.getElementById('finishBtn');
-const resetSessionBtn = document.getElementById('resetSession');
-const resetWeekBtn = document.getElementById('resetWeek');
-const exportBtn = document.getElementById('exportBtn');
-const timerEl = document.getElementById('timer');
-const toastEl = document.getElementById('toast');
-
-// --- Render Tabs ---
 function renderTabs(){
-  dayTabsEl.innerHTML = '';
-  PLAN.forEach((d, i)=>{
-    const b=document.createElement('button');
-    b.className = 'tab'+(i===state.dayIndex?' active':'');
-    b.innerHTML = `<b>${d.id}</b><small>${d.note}</small><div>${d.name}</div>`;
-    b.onclick=()=>{ state.dayIndex=i; save(); renderAll(); };
-    dayTabsEl.appendChild(b);
+  dayTabs.innerHTML='';
+  PLAN.forEach((d,i)=>{
+    const t=document.createElement('div');
+    t.className='tab'+(i===state.day?' active':'');
+    t.textContent=d.name;
+    t.onclick=()=>{state.day=i;renderTabs();renderExercises();};
+    dayTabs.appendChild(t);
   });
 }
-
-// --- Render Exercises ---
 function renderExercises(){
-  const day = PLAN[state.dayIndex];
-  exerciseListEl.innerHTML='';
-  const sess = state.session[ state.dayIndex ] || {};
-
-  day.exercises.forEach((ex, ei)=>{
-    const card=document.createElement('div');
-    card.className='exercise';
-    card.innerHTML = `
-      <div class="top">
-        <div>
-          <div class="name">${ex.name}</div>
-          <div class="muted">Target: ${ex.target}</div>
-        </div>
-        <span class="badge">${ei+1}/${day.exercises.length}</span>
-      </div>
-      <div class="sets" id="sets-${ei}"></div>
-    `;
-    exerciseListEl.appendChild(card);
-
-    const setsEl = card.querySelector(`#sets-${ei}`);
-    const doneArr = sess[ei] || Array.from({length: ex.sets}, ()=>({reps:'', weight:'', done:false}));
-
-    doneArr.forEach((row, si)=>{
-      const r = document.createElement('div');
-      r.className='set';
-      r.innerHTML = `
-        <input type="checkbox" class="check" ${row.done? 'checked':''} />
-        <div><input inputmode="numeric" placeholder="Reps" value="${row.reps}" /><span class="unit">reps</span></div>
-        <div><input inputmode="decimal" placeholder="Vest kg" value="${row.weight}" /><span class="unit">kg</span></div>
-        <button class="ghost saveSet">Save set</button>
-      `;
-
-      const [checkEl, repsWrap, kgWrap, saveBtn] = [
-        r.querySelector('.check'),
-        r.children[1],
-        r.children[2],
-        r.querySelector('.saveSet')
-      ];
-      const repsEl = repsWrap.querySelector('input');
-      const kgEl = kgWrap.querySelector('input');
-
-      saveBtn.onclick=()=>{
-        ensureSessDay();
-        const arr = state.session[state.dayIndex][ei] || Array.from({length: ex.sets}, ()=>({reps:'', weight:'', done:false}));
-        arr[si] = { reps: repsEl.value.trim(), weight: kgEl.value.trim(), done: checkEl.checked };
-        state.session[state.dayIndex][ei] = arr;
-        save();
-        updateSessionProgress();
-        toast('Set saved');
-      };
-
-      checkEl.onchange=()=>{ saveBtn.click(); };
-      repsEl.onchange=()=>{ saveBtn.click(); };
-      kgEl.onchange=()=>{ saveBtn.click(); };
-
-      setsEl.appendChild(r);
-    });
+  exList.innerHTML='';
+  PLAN[state.day].ex.forEach(e=>{
+    const c=document.createElement('div');
+    c.className='exercise';
+    c.innerHTML=`<div class='top'><div><div class='name'>${e}</div></div></div>`;
+    exList.appendChild(c);
   });
+  updateProgress();
 }
-
-function ensureSessDay(){
-  if(!state.session[state.dayIndex]) state.session[state.dayIndex] = {};
-}
-
-function sessionTotals(){
-  const day = PLAN[state.dayIndex];
-  const totalSets = day.exercises.reduce((a,b)=>a+b.sets,0);
-  const sess = state.session[state.dayIndex] || {};
-  let done=0;
-  day.exercises.forEach((ex, ei)=>{
-    const arr = sess[ei] || [];
-    arr.forEach(s=>{ if(s.done) done++; });
-  });
-  return {done, totalSets};
-}
-
-function updateSessionProgress(){
-  const {done,totalSets} = sessionTotals();
-  const pct = totalSets? Math.round((done/totalSets)*100):0;
-  sessionProgressEl.style.width = pct+"%";
-}
-
-// --- Timer ---
-let timerInt = null;
-function startTimer(){
-  if(state.running) return;
-  state.running=true; state.startTime=Date.now(); save();
-  startBtn.disabled=true; finishBtn.disabled=false;
-  timerInt = setInterval(()=>{
-    const s = Math.floor((Date.now()-state.startTime)/1000);
-    const mm = String(Math.floor(s/60)).padStart(2,'0');
-    const ss = String(s%60).padStart(2,'0');
-    timerEl.textContent = `${mm}:${ss}`;
-  }, 500);
-}
-function stopTimer(){
-  if(!state.running) return 0;
-  const secs = Math.floor((Date.now()-state.startTime)/1000);
-  clearInterval(timerInt); timerInt=null; state.running=false; state.startTime=null; save();
-  startBtn.disabled=false; finishBtn.disabled=true; return secs;
-}
-
-// --- Finish & Save Session ---
-function finishAndSave(){
-  const day = PLAN[state.dayIndex];
-  const {done,totalSets}=sessionTotals();
-  const duration = stopTimer();
-  const now = new Date();
-  const entry = {
-    ts: now.toISOString(),
-    week: currentWeekKey(),
-    dayIndex: state.dayIndex,
-    title: day.name,
-    progress: {done,totalSets},
-    data: state.session[state.dayIndex]||{},
-    duration
-  };
-  state.history.unshift(entry);
-  markWeekDayCompleted(now);
-  state.session[state.dayIndex] = {}; // clear current day session after save
-  save();
+function updateProgress(){prog.style.width=state.progress+'%';}
+startBtn.onclick=()=>{
+  state.progress=50;
+  updateProgress();
+  startBtn.disabled=true;
+  finishBtn.disabled=false;
+};
+finishBtn.onclick=()=>{
+  state.progress=100;
+  updateProgress();
+  finishBtn.disabled=true;
+  state.history.unshift({day:PLAN[state.day].name,date:new Date().toLocaleDateString()});
   renderHistory();
-  renderWeek();
-  updateSessionProgress();
-  toast('Workout saved');
-}
-
-function markWeekDayCompleted(date){
-  const k = dayKeyForDate(date);
-  state.weekDays[k]=true;
-}
-
-// --- Week UI ---
-function renderWeek(){
-  const weekKey=currentWeekKey();
-  if(state.week!==weekKey){
-    // New week: reset visual counters but keep history
-    state.week=weekKey; state.weekDays={}; save();
-  }
-  weekLabelEl.textContent = `Week ${weekKey}`;
-
-  // Build 7 dots (Sun..Sat)
-  weekDotsEl.innerHTML='';
-  let count=0;
-  for(let i=0;i<7;i++){
-    const k=`${weekKey}-${i}`;
-    const dot=document.createElement('div');
-    dot.className='dot'+(state.weekDays[k]?' done':'');
-    if(i===new Date().getDay()) dot.classList.add('today');
-    dot.textContent = 'SMTWTFS'[i];
-    weekDotsEl.appendChild(dot);
-    if(state.weekDays[k]) count++;
-  }
-  weekCountEl.textContent = count;
-
-  // Completed program days (how many of 4 saved this week)
-  const weekHist = state.history.filter(h=>h.week===weekKey);
-  const completedDays = new Set(weekHist.map(h=>h.dayIndex)).size; // unique program days done
-  weekDoneEl.textContent = Math.min(completedDays,4);
-
-  weekBarEl.style.width = `${Math.round((count/7)*100)}%`;
-}
-
-// --- History ---
+};
 function renderHistory(){
-  historyListEl.innerHTML='';
-  state.history.slice(0,8).forEach(h=>{
-    const d = new Date(h.ts);
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const dd = String(d.getDate()).padStart(2,'0');
-    const dur = h.duration? `${Math.floor(h.duration/60)}m ${h.duration%60}s` : '—';
-    const pct = h.progress.totalSets? Math.round((h.progress.done/h.progress.totalSets)*100) : 0;
-    const item=document.createElement('div');
-    item.className='log';
-    item.innerHTML=`
-      <h4>${h.title}</h4>
-      <div class="muted">${d.getFullYear()}-${mm}-${dd} · Week ${h.week} · ${dur}</div>
-      <div class="progress" style="margin-top:8px"><div style="width:${pct}%"></div></div>
-    `;
-    historyListEl.appendChild(item);
-  });
-}
-
-// --- Export CSV ---
-function exportCSV(){
-  const rows = [[
-    'timestamp','week','program_day','exercise_index','set_index','reps','vest_kg','done','duration_sec'
-  ]];
+  hist.innerHTML='';
   state.history.forEach(h=>{
-    const data=h.data||{};
-    const duration=h.duration||0;
-    Object.keys(data).forEach(ei=>{
-      (data[ei]||[]).forEach((s,si)=>{
-        rows.push([h.ts,h.week,h.dayIndex,ei,si,s.reps,s.weight,s.done?1:0,duration]);
-      });
-    });
+    const c=document.createElement('div');
+    c.className='exercise';
+    c.innerHTML=`<div class='name'>${h.day}</div><div class='muted'>${h.date}</div>`;
+    hist.appendChild(c);
   });
-  const csv = rows.map(r=>r.join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href=url; a.download='minimalist_calisthenics_history.csv'; a.click();
-  URL.revokeObjectURL(url);
 }
-
-// --- Resetters ---
-function resetSession(){ state.session[state.dayIndex] = {}; save(); renderExercises(); updateSessionProgress(); toast('Session cleared'); }
-function resetWeek(){ state.weekDays={}; save(); renderWeek(); toast('Week reset'); }
-
-// --- Toast ---
-function toast(msg){ toastEl.textContent=msg; toastEl.classList.add('show'); setTimeout(()=>toastEl.classList.remove('show'), 1600); }
-
-// --- Nav (bottom) ---
-const nav = document.querySelector('nav.bottom');
-nav.addEventListener('click', (e)=>{
-  if(e.target.tagName!=='BUTTON') return;
-  nav.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
-  e.target.classList.add('active');
-  const v = e.target.dataset.view;
-  // Smooth scroll to relevant area in this single page
-  const to = { workout:'#workoutCard', week:'#workoutCard', history:'body', settings:'#workoutCard' }[v] || '#workoutCard';
-  document.querySelector(to).scrollIntoView({behavior:'smooth'});
-});
-
-// --- Wire buttons ---
-startBtn.onclick = ()=>{ startTimer(); };
-finishBtn.onclick = ()=>{ finishAndSave(); };
-resetSessionBtn.onclick = ()=>{ resetSession(); };
-resetWeekBtn.onclick = ()=>{ resetWeek(); };
-exportBtn.onclick = ()=>{ exportCSV(); };
-
-// --- Initial render ---
-function renderAll(){ renderTabs(); renderExercises(); updateSessionProgress(); renderWeek(); renderHistory(); }
-renderAll();
-
+function toggleTheme(){
+  if(state.theme==='light'){
+    document.body.dataset.theme='dark';
+    state.theme='dark';
+    themeBtn.textContent='🌙';
+  }else{
+    document.body.dataset.theme='light';
+    state.theme='light';
+    themeBtn.textContent='☀️';
+  }
+}
+themeBtn.onclick=toggleTheme;
+renderTabs();
+renderExercises();
 </script>
 </body>
 </html>
